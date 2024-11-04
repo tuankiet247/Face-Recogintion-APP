@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Đăng Nhập</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 3rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="hidden"] {
+            display: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        p {
+            margin-top: 15px;
+            font-size: 1rem;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        video {
+            width: 300px;
+            margin-bottom: 15px;
+            transform: scaleX(-1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Đăng Nhập</h1>
+    <form id="login-form" action="/login" method="POST" onsubmit="return validateForm()">
+        <label for="username">Tên đăng nhập:</label>
+        <input type="text" name="username" id="username" required>
+
+        <label for="password">Mật khẩu:</label>
+        <input type="password" name="password" id="password" required>
+
+        <video id="video" autoplay></video>
+        <button type="button" id="capture">Chụp ảnh</button>
+        
+        <input type="hidden" name="image_data" id="image_data" required>
+        
+        <button type="submit">Đăng Nhập</button>
+    </form>
+    <p>Bạn chưa có tài khoản? <a href="/register">Đăng ký tại đây</a></p>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('capture');
+        const imageDataInput = document.getElementById('image_data');
+        let useFrontCamera = true;
+
+        function startCamera() {
+            const constraints = {
+                video: {
+                    facingMode: useFrontCamera ? 'user' : 'environment'
+                }
+            };
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.style.transform = useFrontCamera ? 'scaleX(-1)' : 'scaleX(1)';
+                })
+                .catch(err => {
+                    console.error("Lỗi khi mở camera: ", err);
+                });
+        }
+
+        startCamera();
+
+        captureButton.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            if (useFrontCamera) {
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+            }
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/png');
+            imageDataInput.value = imageData;
+            alert('Ảnh đã được chụp! Bạn có thể đăng nhập.');
+        });
+
+        function validateForm() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (!username || !password) {
+                alert('Vui lòng nhập tên đăng nhập và mật khẩu.');
+                return false;
+            }
+            if (!imageDataInput.value) {
+                alert('Bạn cần chụp một bức ảnh trước khi đăng nhập!');
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

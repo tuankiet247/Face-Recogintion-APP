@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Chụp Hình</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 3rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        video {
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            margin-top: 20px;
+            width: 100%; /* Responsive width */
+            max-width: 640px;
+            height: auto; /* Maintain aspect ratio */
+            transform: scaleX(-1); /* Lật video theo trục X */
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chụp Hình</h1>
+    <video id="video" autoplay></video>
+    <button id="capture-button">Chụp Hình</button>
+    <form id="capture-form" action="/save_user" method="POST" style="display:none;">
+        <input type="hidden" name="username" value="{{ username }}">
+        <input type="hidden" name="age" value="{{ age }}">
+        <input type="hidden" name="birth_date" value="{{ birth_date }}">
+        <input type="hidden" name="occupation" value="{{ occupation }}">
+        <input type="hidden" name="gender" value="{{ gender }}">
+        <input type="hidden" name="image_data" id="image_data" required>
+    </form>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('capture-button');
+        const imageDataInput = document.getElementById('image_data');
+
+        // Truy cập vào camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error("Không thể mở camera: ", error);
+            });
+
+        // Chụp hình khi nhấn nút "Chụp Hình"
+        captureButton.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            
+            // Lật hình ảnh để khớp với video đã lật
+            context.translate(canvas.width, 0);
+            context.scale(-1, 1);
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Lấy dữ liệu hình ảnh
+            const imageData = canvas.toDataURL('image/png');
+            imageDataInput.value = imageData;
+
+            // Disable capture button to prevent multiple submissions
+            captureButton.disabled = true;
+
+            // Gửi dữ liệu hình ảnh và xử lý phản hồi
+            document.getElementById('capture-form').submit();
+        });
+
+        // Xử lý phản hồi sau khi gửi form
+        document.getElementById('capture-form').addEventListener('submit', (event) => {
+            event.preventDefault();  // Ngăn chặn gửi form mặc định
+            
+            const formData = new FormData(event.target);
+            fetch(event.target.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Kiểm tra phản hồi từ server
+                if (data.includes("User information saved successfully!")) {
+                    alert('Lưu thành công! Chuyển đến trang đăng nhập.');
+                    window.location.href = "/login";  // Chuyển đến trang đăng nhập
+                } else {
+                    alert('Không nhận diện ra khuôn mặt. Vui lòng thử lại.');
+                }
+                captureButton.disabled = false; // Re-enable button after processing
+            })
+            .catch(error => {
+                console.error("Có lỗi xảy ra: ", error);
+                alert('Đã xảy ra lỗi khi gửi dữ liệu. Vui lòng thử lại.');
+                captureButton.disabled = false; // Re-enable button if there is an error
+            });
+        });
+    </script>
+</body>
+</html>

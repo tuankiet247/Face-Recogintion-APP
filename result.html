@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả Đăng nhập</title>
+    <link rel="stylesheet" href="static/styles.css"> <!-- Thêm CSS nếu cần -->
+    <style>
+        .message {
+            font-size: 2em; /* Kích thước chữ lớn */
+            text-align: center; /* Căn giữa */
+            margin-top: 20%; /* Căn giữa theo chiều dọc */
+            color: #ff0000; /* Màu chữ nổi bật */
+        }
+        .container {
+            text-align: center; /* Căn giữa nội dung */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="message">
+            {% if success %}
+                Login Successfull!
+            {% else %}
+                Login Unsuccessfull! Please try again!
+            {% endif %}
+        </div>
+
+        {% if success %}
+            <h2>Thông tin cá nhân</h2>
+            <p><strong>Tên:</strong> {{ user.name }}</p>
+            <p><strong>Tuổi:</strong> {{ user.age }}</p>
+            <p><strong>Ngày sinh:</strong> {{ user.birth_date }}</p>
+            <p><strong>Nghề nghiệp:</strong> {{ user.occupation }}</p>
+            <p><strong>Mã số sinh viên:</strong> {{ user.student_id }}</p>
+            <p><strong>Giới tính:</strong> {{ user.gender }}</p>
+        {% endif %}
+        
+        <a href="/" class="btn">Return to main page</a>
+    </div>
+</body>
+</html>

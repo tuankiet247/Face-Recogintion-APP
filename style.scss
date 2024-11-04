@@ -1,0 +1,51 @@
+// styles.scss
+
+// Các biến màu sắc
+$primary-color: #4CAF50;
+$secondary-color: #ffffff;
+$text-color: #333;
+$background-color: #f4f4f4;
+
+// Mixin cho các hiệu ứng
+@mixin button-style {
+    background-color: $primary-color;
+    color: $secondary-color;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: darken($primary-color, 10%);
+    }
+}
+
+// Các quy tắc cho body
+body {
+    font-family: Arial, sans-serif;
+    background-color: $background-color;
+    color: $text-color;
+    margin: 0;
+    padding: 20px;
+
+    h1 {
+        color: $primary-color;
+    }
+}
+
+// Quy tắc cho biểu mẫu
+form {
+    margin-top: 20px;
+    input {
+        display: block;
+        margin-bottom: 10px;
+        padding: 10px;
+        width: 200px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    button {
+        @include button-style; // Sử dụng mixin cho nút
+    }
+}
